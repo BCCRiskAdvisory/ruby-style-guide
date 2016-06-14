@@ -182,14 +182,8 @@ Translations of the guide are available in the following languages:
   # bad
   def too_much; something; something_else; end
 
-  # okish - notice that the first ; is required
-  def no_braces_method; body end
-
-  # okish - notice that the second ; is optional
-  def no_braces_method; body; end
-
-  # okish - valid syntax, but no ; makes it kind of hard to read
-  def some_method() body end
+  # okish, particularly if method name is short
+  def short_method; body; end
 
   # good
   def some_method
@@ -228,34 +222,28 @@ Translations of the guide are available in the following languages:
 
 * <a name="spaces-braces"></a>
   No spaces after `(`, `[` or before `]`, `)`.
-  Use spaces around `{` and before `}`.
+  Use spaces after `{` and before `}` for blocks
 <sup>[[link](#spaces-braces)]</sup>
 
   ```Ruby
   # bad
   some( arg ).other
-  [ 1, 2, 3 ].each{|e| puts e}
+  [ 1, 2, 3 ].map {|e| e * 2} .each {|e| puts e}
 
   # good
   some(arg).other
-  [1, 2, 3].each { |e| puts e }
+  [1, 2, 3].map{ |e| e * 2 }.each{ |e| puts e }
   ```
 
   `{` and `}` deserve a bit of clarification, since they are used
   for block and hash literals, as well as string interpolation.
 
-  For hash literals two styles are considered acceptable.
-  The first variant is slightly more readable (and arguably more
-  popular in the Ruby community in general). The second variant has
-  the advantage of adding visual difference between block and hash
-  literals. Whichever one you pick - apply it consistently.
+  For hash literals use no spaces between the braces and the contents. Also
+  prefer rocket notation so that the key type is always clear.
 
   ```Ruby
-  # good - space after { and before }
-  { one: 1, two: 2 }
-
   # good - no space after { and before }
-  {one: 1, two: 2}
+  {:one => 1, "two" => 2, 5 => 6}
   ```
 
   With interpolated expressions, there should be no padded-spacing inside the braces.
@@ -327,7 +315,8 @@ Translations of the guide are available in the following languages:
 
 * <a name="indent-conditional-assignment"></a>
   When assigning the result of a conditional expression to a variable,
-  preserve the usual alignment of its branches.
+  preserve the usual alignment of its branches. However, consider refactoring,
+  all of these constructions are awkward and hard to read.
 <sup>[[link](#indent-conditional-assignment)]</sup>
 
   ```Ruby
@@ -787,7 +776,7 @@ Translations of the guide are available in the following languages:
   elem # => 3
 
   # good
-  arr.each { |elem| puts elem }
+  arr.each{ |elem| puts elem }
 
   # elem is not accessible outside each's block
   elem # => NameError: undefined local variable or method `elem'
@@ -1259,7 +1248,7 @@ condition](#safe-assignment-in-condition).
 
   ```Ruby
   # bad
-  names.map { |name| name.upcase }
+  names.map{ |name| name.upcase }
 
   # good
   names.map(&:upcase)
@@ -1281,15 +1270,15 @@ condition](#safe-assignment-in-condition).
   end
 
   # good
-  names.each { |name| puts name }
+  names.each{ |name| puts name }
 
   # bad
   names.select do |name|
     name.start_with?('S')
-  end.map { |name| name.upcase }
+  end.map{ |name| name.upcase }
 
   # good
-  names.select { |name| name.start_with?('S') }.map(&:upcase)
+  names.select{ |name| name.start_with?('S') }.map(&:upcase)
   ```
 
   Some will argue that multi-line chaining would look OK with the use of {...},
@@ -1308,7 +1297,7 @@ condition](#safe-assignment-in-condition).
   # bad
   def with_tmp_dir
     Dir.mktmpdir do |tmp_dir|
-      Dir.chdir(tmp_dir) { |dir| yield dir }  # block just passes arguments
+      Dir.chdir(tmp_dir){ |dir| yield dir }  # block just passes arguments
     end
   end
 
@@ -1608,7 +1597,7 @@ condition](#safe-assignment-in-condition).
 
   ```Ruby
   # bad
-  l = lambda { |a, b| a + b }
+  l = lambda{ |a, b| a + b }
   l.call(1, 2)
 
   # correct, but looks extremely awkward
@@ -1618,7 +1607,7 @@ condition](#safe-assignment-in-condition).
   end
 
   # good
-  l = ->(a, b) { a + b }
+  l = ->(a, b){ a + b }
   l.call(1, 2)
 
   l = lambda do |a, b|
@@ -1637,7 +1626,7 @@ parameters.
   l = ->x, y { something(x, y) }
 
   # good
-  l = ->(x, y) { something(x, y) }
+  l = ->(x, y){ something(x, y) }
   ```
 
 * <a name="stabby-lambda-no-args"></a>
@@ -1647,10 +1636,10 @@ no parameters.
 
   ```Ruby
   # bad
-  l = ->() { something }
+  l = ->(){ something }
 
   # good
-  l = -> { something }
+  l = ->{ something }
   ```
 
 * <a name="proc"></a>
@@ -1659,10 +1648,10 @@ no parameters.
 
   ```Ruby
   # bad
-  p = Proc.new { |n| puts n }
+  p = Proc.new{ |n| puts n }
 
   # good
-  p = proc { |n| puts n }
+  p = proc{ |n| puts n }
   ```
 
 * <a name="proc-call"></a>
@@ -1692,7 +1681,7 @@ no parameters.
 
   ```Ruby
   # bad
-  result = hash.map { |k, v| v + 1 }
+  result = hash.map{ |k, v| v + 1 }
 
   def something(x)
     unused_var, used_var = something_else(x)
@@ -1700,7 +1689,7 @@ no parameters.
   end
 
   # good
-  result = hash.map { |_k, v| v + 1 }
+  result = hash.map{ |_k, v| v + 1 }
 
   def something(x)
     _unused_var, used_var = something_else(x)
@@ -1708,7 +1697,7 @@ no parameters.
   end
 
   # good
-  result = hash.map { |_, v| v + 1 }
+  result = hash.map{ |_, v| v + 1 }
 
   def something(x)
     _, used_var = something_else(x)
@@ -1779,13 +1768,13 @@ no parameters.
   ```Ruby
   # bad
   paths = [paths] unless paths.is_a? Array
-  paths.each { |path| do_something(path) }
+  paths.each{ |path| do_something(path) }
 
   # bad (always creates a new Array instance)
-  [*paths].each { |path| do_something(path) }
+  [*paths].each{ |path| do_something(path) }
 
   # good (and a bit more readable)
-  Array(paths).each { |path| do_something(path) }
+  Array(paths).each{ |path| do_something(path) }
   ```
 
 * <a name="ranges-or-between"></a>
@@ -3070,31 +3059,28 @@ resource cleanup when possible.
   ```
 
 * <a name="percent-w"></a>
-  Prefer `%w` to the literal array syntax when you need an array of words
-  (non-empty strings without spaces and special characters in them).  Apply this
-  rule only to arrays with two or more elements.
+  Prefer literal array syntax when you need an array of words
+  (non-empty strings without spaces and special characters in them).
 <sup>[[link](#percent-w)]</sup>
 
   ```Ruby
   # bad
-  STATES = ['draft', 'open', 'closed']
+  STATES = %w(draft open closed)
 
   # good
-  STATES = %w(draft open closed)
+  STATES = ['draft', 'open', 'closed']
   ```
 
 * <a name="percent-i"></a>
-  Prefer `%i` to the literal array syntax when you need an array of symbols
-  (and you don't need to maintain Ruby 1.9 compatibility). Apply this rule only
-  to arrays with two or more elements.
+  Prefer literal array syntax when you need an array of symbols  
 <sup>[[link](#percent-i)]</sup>
 
   ```Ruby
   # bad
-  STATES = [:draft, :open, :closed]
+  STATES = %i(draft open closed)
 
   # good
-  STATES = %i(draft open closed)
+  STATES = [:draft, :open, :closed]
   ```
 
 * <a name="no-trailing-array-commas"></a>
@@ -3144,10 +3130,10 @@ resource cleanup when possible.
 
   ```Ruby
   # bad
-  hash = { 'one' => 1, 'two' => 2, 'three' => 3 }
+  hash = {'one' => 1, 'two' => 2, 'three' => 3}
 
   # good
-  hash = { one: 1, two: 2, three: 3 }
+  hash = {:one => 1, :two => 2, :three => 3}
   ```
 
 * <a name="no-mutable-keys"></a>
@@ -3155,29 +3141,15 @@ resource cleanup when possible.
 <sup>[[link](#no-mutable-keys)]</sup>
 
 * <a name="hash-literals"></a>
-  Use the Ruby 1.9 hash literal syntax when your hash keys are symbols.
+  Use the rocket hash syntax regardless of key type for consistency.
 <sup>[[link](#hash-literals)]</sup>
 
   ```Ruby
   # bad
-  hash = { :one => 1, :two => 2, :three => 3 }
+  hash = {one: 1, two: 2, three: 3}
 
   # good
-  hash = { one: 1, two: 2, three: 3 }
-  ```
-
-* <a name="no-mixed-hash-syntaces"></a>
-  Don't mix the Ruby 1.9 hash syntax with hash rockets in the same hash
-  literal. When you've got keys that are not symbols stick to the hash rockets
-  syntax.
-<sup>[[link](#no-mixed-hash-syntaces)]</sup>
-
-  ```Ruby
-  # bad
-  { a: 1, 'b' => 2 }
-
-  # good
-  { :a => 1, 'b' => 2 }
+  hash = {:one => 1, :two => 2, :three => 3}
   ```
 
 * <a name="hash-key"></a>
@@ -3204,14 +3176,14 @@ resource cleanup when possible.
 
   ```Ruby
   # bad
-  hash.keys.each { |k| p k }
-  hash.values.each { |v| p v }
-  hash.each { |k, _v| p k }
-  hash.each { |_k, v| p v }
+  hash.keys.each{ |k| p k }
+  hash.values.each{ |v| p v }
+  hash.each{ |k, _v| p k }
+  hash.each{ |_k, v| p v }
 
   # good
-  hash.each_key { |k| p k }
-  hash.each_value { |v| p v }
+  hash.each_key{ |k| p k }
+  hash.each_value{ |v| p v }
   ```
 
 * <a name="hash-fetch"></a>
@@ -3219,7 +3191,7 @@ resource cleanup when possible.
 <sup>[[link](#hash-fetch)]</sup>
 
   ```Ruby
-  heroes = { batman: 'Bruce Wayne', superman: 'Clark Kent' }
+  heroes = { :batman => 'Bruce Wayne', :superman => 'Clark Kent' }
   # bad - if we make a mistake we might not spot it right away
   heroes[:batman] # => 'Bruce Wayne'
   heroes[:supermann] # => nil
@@ -3234,7 +3206,7 @@ resource cleanup when possible.
 <sup>[[link](#hash-fetch-defaults)]</sup>
 
   ```Ruby
-  batman = { name: 'Bruce Wayne', is_evil: false }
+  batman = { :name => 'Bruce Wayne', :is_evil => false }
 
   # bad - if we just use || operator with falsy value we won't get the expected result
   batman[:is_evil] || true # => true
@@ -3249,14 +3221,14 @@ resource cleanup when possible.
   <sup>[[link](#use-hash-blocks)]</sup>
 
   ```Ruby
-  batman = { name: 'Bruce Wayne' }
+  batman = { :name => 'Bruce Wayne' }
 
   # bad - if we use the default value, we eager evaluate it
   # so it can slow the program down if done multiple times
   batman.fetch(:powers, obtain_batman_powers) # obtain_batman_powers is an expensive call
 
   # good - blocks are lazy evaluated, so only triggered in case of KeyError exception
-  batman.fetch(:powers) { obtain_batman_powers }
+  batman.fetch(:powers){ obtain_batman_powers }
   ```
 
 * <a name="hash-values-at"></a>
@@ -3299,6 +3271,8 @@ resource cleanup when possible.
   When providing an accessor for a collection, provide an alternate form
   to save users from checking for `nil` before accessing an element in
   the collection.
+
+
 <sup>[[link](#provide-alternate-accessor-to-collections)]</sup>
 
   ```Ruby
@@ -3317,6 +3291,26 @@ resource cleanup when possible.
   end
   ```
 ## Numbers
+
+Not sure about this one, this makes code using this accessor more difficult to
+read:
+
+    ```Ruby
+      something.awesome_things(2)
+    ```
+
+It may not be clear that this is just indexing an array (or hash). Consider
+initializing the indexed object to an empty array/hash to prevent indexing nil.
+
+    ```Ruby
+      def initialize
+        @awesome_things = []
+      end
+
+      def awesome_things
+        @awesome_things
+      end      
+    ```
 
 * <a name="integer-type-checking"></a>
   Use `Integer` check type of an integer number. Since `Fixnum` is platform-dependent, checking against it will
